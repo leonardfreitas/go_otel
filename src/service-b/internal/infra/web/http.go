@@ -2,6 +2,7 @@ package web
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
@@ -27,6 +28,8 @@ func NewWebController(usecase entity.WeatherUseCase, validator *validator.Valida
 	}
 }
 
+var ErrNotFound = errors.New("not found")
+
 func (controller controller) Get(response http.ResponseWriter, request *http.Request) {
 	carrier := propagation.HeaderCarrier(request.Header)
 	ctx := request.Context()
@@ -47,10 +50,8 @@ func (controller controller) Get(response http.ResponseWriter, request *http.Req
 	weather, err := controller.usecase.Get(ctx, cep.Cep)
 
 	if err != nil {
-		statusCode, message := errorhandle.Handle(err)
-		response.WriteHeader(statusCode)
-		json.NewEncoder(response).Encode(message)
-
+		response.WriteHeader(404)
+		json.NewEncoder(response).Encode(map[string]string{"error": "can not find zipcode"})
 		return
 	}
 

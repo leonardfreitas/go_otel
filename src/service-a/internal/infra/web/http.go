@@ -28,6 +28,7 @@ func NewWebController(usecase entity.WeatherUseCase, validator *validator.Valida
 }
 
 func (controller controller) Get(response http.ResponseWriter, request *http.Request) {
+	print("SERVICO A")
 	carrier := propagation.HeaderCarrier(request.Header)
 	ctx := request.Context()
 	ctx = otel.GetTextMapPropagator().Extract(ctx, carrier)
@@ -51,10 +52,9 @@ func (controller controller) Get(response http.ResponseWriter, request *http.Req
 	weatherOutput, err := controller.usecase.Get(ctx, cep.Cep)
 
 	if err != nil {
-		statusCode, message := errorhandle.Handle(err)
-		response.WriteHeader(statusCode)
-		json.NewEncoder(response).Encode(message)
-
+		print("ENTROU AQUIIIII")
+		response.WriteHeader(404)
+		json.NewEncoder(response).Encode(map[string]string{"error": "can not find zipcode"})
 		return
 	}
 
